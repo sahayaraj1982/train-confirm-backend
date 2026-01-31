@@ -58,3 +58,8 @@ app.get("/trains/filter/:type", (req, res) => {
 
   res.json(trains.filter(t => t.availability === type));
 });
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
