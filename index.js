@@ -3,7 +3,6 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// Root route (IMPORTANT)
 app.get("/", (req, res) => {
   res.send("Train Confirm Backend is LIVE 🚆");
 });
@@ -16,24 +15,6 @@ app.get("/trains", (req, res) => {
   ]);
 });
 
-app.get("/trains/confirm", (req, res) => {
-  res.json([
-    { trainNo: "20601", name: "Vande Bharat", class: "CC", availability: "CONFIRM" }
-  ]);
-});
-
-app.get("/trains/rac", (req, res) => {
-  res.json([
-    { trainNo: "12636", name: "Vaigai SF", class: "3A", availability: "RAC" }
-  ]);
-});
-
-app.get("/trains/wl", (req, res) => {
-  res.json([
-    { trainNo: "12638", name: "Pandian SF", class: "SL", availability: "WL" }
-  ]);
-});
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port " + PORT);
 });
