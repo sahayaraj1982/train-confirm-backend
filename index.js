@@ -1,18 +1,53 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
 const PORT = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("Train Confirm Backend is LIVE 🚆");
+/*
+FINAL LOGIC:
+- General / Tatkal / Premium Tatkal
+- currentAvailability > 0 மட்டும் SHOW
+- WL / 0 / NA → HIDE
+*/
+
+app.get("/search", (req, res) => {
+  const allData = [
+    {
+      train: "PANDIAN EXPRESS",
+      quota: "TATKAL",
+      class: "3A AC",
+      currentAvailability: 8,
+      status: "CONFIRM"
+    },
+    {
+      train: "VAIGAI EXPRESS",
+      quota: "GENERAL",
+      class: "3A AC",
+      currentAvailability: 0,
+      status: "WL"
+    },
+    {
+      train: "NELLAI EXPRESS",
+      quota: "PREMIUM TATKAL",
+      class: "3A AC",
+      currentAvailability: 0,
+      status: "NA"
+    }
+  ];
+
+  // ONLY AVAILABLE (currentAvailability > 0)
+  const visibleResults = allData.filter(
+    item => item.currentAvailability > 0
+  );
+
+  res.json(visibleResults);
 });
 
-app.get("/trains", (req, res) => {
-  res.json([
-    { trainNo: "20601", name: "Vande Bharat", class: "CC", availability: "CONFIRM" },
-    { trainNo: "12636", name: "Vaigai SF", class: "3A", availability: "RAC" },
-    { trainNo: "12638", name: "Pandian SF", class: "SL", availability: "WL" }
-  ]);
+// Root check
+app.get("/", (req, res) => {
+  res.send("Train Confirm Backend LIVE");
 });
 
 app.listen(PORT, () => {
