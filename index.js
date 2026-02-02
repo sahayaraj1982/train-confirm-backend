@@ -3,53 +3,38 @@ const app = express();
 
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+// MAIN SEARCH API
+app.post("/search", (req, res) => {
+  const { date, from, to, quota, classType } = req.body;
 
-/*
-FINAL LOGIC:
-- General / Tatkal / Premium Tatkal
-- currentAvailability > 0 மட்டும் SHOW
-- WL / 0 / NA → HIDE
-*/
-
-app.get("/search", (req, res) => {
-  const allData = [
+  // SAMPLE DATA (demo purpose)
+  const trains = [
     {
-      train: "PANDIAN EXPRESS",
+      trainName: "PANDIAN EXPRESS",
       quota: "TATKAL",
-      class: "3A AC",
-      currentAvailability: 8,
-      status: "CONFIRM"
-    },
-    {
-      train: "VAIGAI EXPRESS",
-      quota: "GENERAL",
-      class: "3A AC",
-      currentAvailability: 0,
-      status: "WL"
-    },
-    {
-      train: "NELLAI EXPRESS",
-      quota: "PREMIUM TATKAL",
-      class: "3A AC",
-      currentAvailability: 0,
-      status: "NA"
+      class: "3A",
+      availability: "CONFIRM",
+      availableSeats: 8
     }
   ];
 
-  // ONLY AVAILABLE (currentAvailability > 0)
-  const visibleResults = allData.filter(
-    item => item.currentAvailability > 0
-  );
-
-  res.json(visibleResults);
+  res.json({
+    date,
+    from,
+    to,
+    result: trains
+  });
 });
 
-// Root check
+// ROOT CHECK
 app.get("/", (req, res) => {
-  res.send("Train Confirm Backend LIVE");
+  res.json({
+    status: "API WORKING",
+    message: "Train Confirm Backend Live"
+  });
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
