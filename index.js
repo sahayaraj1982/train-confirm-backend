@@ -3,25 +3,22 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-/*
-INPUT:
-- date
-- from
-- to
-
-RULE:
-- ONLY CONFIRM tickets
-- Show CURRENT AVAILABILITY
-- WL / RAC / others HIDE
-*/
-
 app.get("/", (req, res) => {
   res.send("OK");
 });
 
 app.get("/search", (req, res) => {
-  // demo data (IRCTC-like)
+  // Demo IRCTC-like data
   const trains = [
+    {
+      trainName: "PANDIAN EXPRESS",
+      trainNo: "12638",
+      quota: "GENERAL",
+      class: "3A",
+      status: "CONFIRM",
+      currentAvailability: "AVAILABLE",
+      seatsAvailable: 6
+    },
     {
       trainName: "PANDIAN EXPRESS",
       trainNo: "12638",
@@ -32,17 +29,35 @@ app.get("/search", (req, res) => {
       seatsAvailable: 8
     },
     {
-      trainName: "VAIGAI EXPRESS",
-      trainNo: "12636",
-      quota: "GENERAL",
-      class: "SL",
+      trainName: "PANDIAN EXPRESS",
+      trainNo: "12638",
+      quota: "PREMIUM TATKAL",
+      class: "3A",
       status: "WL",
-      currentAvailability: "WL 12",
+      currentAvailability: "WL 5",
       seatsAvailable: 0
+    },
+    {
+      trainName: "PANDIAN EXPRESS",
+      trainNo: "12638",
+      quota: "LADIES",
+      class: "SL",
+      status: "CONFIRM",
+      currentAvailability: "AVAILABLE",
+      seatsAvailable: 2
+    },
+    {
+      trainName: "PANDIAN EXPRESS",
+      trainNo: "12638",
+      quota: "SENIOR CITIZEN",
+      class: "2A",
+      status: "CONFIRM",
+      currentAvailability: "AVAILABLE",
+      seatsAvailable: 1
     }
   ];
 
-  // ONLY CONFIRM
+  // CONFIRM ONLY filter
   const result = trains.filter(t => t.status === "CONFIRM");
 
   res.json({
@@ -53,6 +68,4 @@ app.get("/search", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+app.listen(PORT);
