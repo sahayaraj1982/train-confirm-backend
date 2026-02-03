@@ -5,40 +5,46 @@
 <title>Confirm Ticket Search</title>
 
 <style>
-body{
+body {
   font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
+  padding: 20px;
 }
-h2{margin-bottom:15px;}
-
-input, select, button{
-  padding:10px;
-  margin:6px 0;
-  width:100%;
-  max-width:400px;
-  display:block;
+h2 {
+  margin-bottom: 15px;
 }
-
-button{
-  background:#007bff;
-  color:#fff;
-  border:none;
-  cursor:pointer;
+label {
+  display: block;
+  margin-top: 12px;
 }
-button:hover{background:#0056b3;}
-
-table{
-  border-collapse:collapse;
-  margin-top:20px;
-  width:100%;
+input, select, button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
 }
-th,td{
-  border:1px solid #333;
-  padding:8px;
-  text-align:center;
+select[multiple] {
+  height: 140px;
 }
-th{background:#eaeaea;}
+button {
+  margin-top: 20px;
+  background: #0b5ed7;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 25px;
+}
+th, td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+}
+th {
+  background: #eee;
+}
 </style>
 </head>
 
@@ -56,12 +62,12 @@ th{background:#eaeaea;}
 <input type="text" id="to" placeholder="CHENNAI">
 
 <label>Quota (Current Availability)</label>
-<select id="quota">
-  <option value="GENERAL">General</option>
-  <option value="TATKAL">Tatkal</option>
-  <option value="PT">Premium Tatkal</option>
-  <option value="LADIES">Ladies</option>
-  <option value="SENIOR">Senior Citizen</option>
+<select id="quota" multiple>
+  <option value="General" selected>General</option>
+  <option value="Tatkal" selected>Tatkal</option>
+  <option value="Premium Tatkal" selected>Premium Tatkal</option>
+  <option value="Ladies" selected>Ladies</option>
+  <option value="Senior Citizen" selected>Senior Citizen</option>
 </select>
 
 <button onclick="search()">Search (Confirm Only)</button>
@@ -69,25 +75,24 @@ th{background:#eaeaea;}
 <div id="result"></div>
 
 <script>
-function search(){
+function search() {
 
-  // Dummy live-style data (CONFIRM ONLY)
   const data = [
     {
-      train:"Pandian Express",
-      number:"12637",
-      quota:"GENERAL",
-      class:"3A",
-      seats:8,
-      status:"CONFIRM"
+      train: "Vaigai Express",
+      number: "12635",
+      quota: "General",
+      class: "3A",
+      seats: 12,
+      status: "CONFIRM"
     },
     {
-      train:"Vaigai Express",
-      number:"12635",
-      quota:"TATKAL",
-      class:"SL",
-      seats:5,
-      status:"CONFIRM"
+      train: "Pandian Express",
+      number: "12637",
+      quota: "Tatkal",
+      class: "SL",
+      seats: 6,
+      status: "CONFIRM"
     }
   ];
 
@@ -98,25 +103,26 @@ function search(){
       <th>Train No</th>
       <th>Quota</th>
       <th>Class</th>
-      <th>Available Seats</th>
+      <th>Seats Available</th>
       <th>Status</th>
     </tr>`;
 
-  data.forEach(t=>{
-    if(t.status==="CONFIRM"){
+  data.forEach(d => {
+    if (d.status === "CONFIRM") {
       html += `
       <tr>
-        <td>${t.train}</td>
-        <td>${t.number}</td>
-        <td>${t.quota}</td>
-        <td>${t.class}</td>
-        <td>${t.seats}</td>
-        <td style="color:green;font-weight:bold;">CONFIRM</td>
+        <td>${d.train}</td>
+        <td>${d.number}</td>
+        <td>${d.quota}</td>
+        <td>${d.class}</td>
+        <td>${d.seats}</td>
+        <td>${d.status}</td>
       </tr>`;
     }
   });
 
-  html += `</table>`;
+  html += "</table>";
+
   document.getElementById("result").innerHTML = html;
 }
 </script>
