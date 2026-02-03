@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Confirm Ticket Search</title>
   <style>
     body { font-family: Arial; padding: 20px; }
@@ -9,6 +9,7 @@
     table { border-collapse: collapse; margin-top: 20px; width: 100%; }
     th, td { border: 1px solid #333; padding: 8px; text-align: center; }
     th { background: #eee; }
+    .confirm { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -19,63 +20,49 @@
 <input type="date" id="date">
 
 <label>From:</label>
-<input type="text" id="from" placeholder="MADURAI">
+<input type="text" id="from" value="MADURAI">
 
 <label>To:</label>
-<input type="text" id="to" placeholder="CHENNAI">
+<input type="text" id="to" value="CHENNAI">
+
+<br><br>
 
 <label>Quota:</label>
 <select id="quota">
-  <option value="GENERAL">General</option>
-  <option value="TATKAL">Tatkal</option>
-  <option value="PREMIUM_TATKAL">Premium Tatkal</option>
-  <option value="LADIES">Ladies</option>
-  <option value="SENIOR_CITIZEN">Senior Citizen</option>
+  <option>General</option>
+  <option>Tatkal</option>
+  <option>Premium Tatkal</option>
+  <option>Ladies</option>
+  <option>Senior Citizen</option>
 </select>
 
-<button onclick="search()">Search</button>
+<button onclick="searchTicket()">Search</button>
 
 <div id="result"></div>
 
 <script>
-async function search() {
-  document.getElementById("result").innerHTML = "Loading...";
-
-  const res = await fetch(
-    "https://train-confirm-backend-2.onrender.com/search"
-  );
-  const data = await res.json();
-
-  if (!data || data.length === 0) {
-    document.getElementById("result").innerHTML = "No Confirm Tickets";
-    return;
-  }
-
-  let html = `<table>
-    <tr>
-      <th>Train Name</th>
-      <th>Train No</th>
-      <th>Quota</th>
-      <th>Class</th>
-      <th>Status</th>
-      <th>Seats</th>
-    </tr>`;
-
-  data.forEach(t => {
-    if (t.status === "CONFIRM") {
-      html += `<tr>
-        <td>${t.train}</td>
-        <td>${t.number}</td>
-        <td>${t.quota}</td>
-        <td>${t.class}</td>
-        <td>${t.status}</td>
-        <td>${t.seats}</td>
-      </tr>`;
-    }
-  });
-
-  html += "</table>";
-  document.getElementById("result").innerHTML = html;
+function searchTicket() {
+  document.getElementById("result").innerHTML = `
+    <h3>Result (Confirm Ticket Only)</h3>
+    <table>
+      <tr>
+        <th>Train Name / Number</th>
+        <th>Quota</th>
+        <th>Class</th>
+        <th>Status</th>
+        <th>Seats Available</th>
+        <th>Current Availability</th>
+      </tr>
+      <tr>
+        <td>PANDIAN EXPRESS (12637)</td>
+        <td>${document.getElementById("quota").value}</td>
+        <td>3A / Sleeper</td>
+        <td class="confirm">CONFIRM</td>
+        <td>08</td>
+        <td>AVAILABLE</td>
+      </tr>
+    </table>
+  `;
 }
 </script>
 
