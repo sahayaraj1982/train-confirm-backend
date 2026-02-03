@@ -52,3 +52,19 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
+app.get("/api/confirm", (req, res) => {
+  res.json({
+    date: req.query.date || "N/A",
+    from: req.query.from || "N/A",
+    to: req.query.to || "N/A",
+    result: [
+      {
+        train: "PANDIAN",
+        quota: "TATKAL",
+        class: "3A",
+        availability: "CONFIRM",
+        seats: 8
+      }
+    ]
+  });
+});
