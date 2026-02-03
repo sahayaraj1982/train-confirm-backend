@@ -3,59 +3,50 @@ const app = express();
 
 app.use(express.json());
 
-// SEARCH CONFIRM TICKETS ONLY
-app.post("/search", (req, res) => {
-  const { date, from, to, quota, classType } = req.body;
+const PORT = process.env.PORT || 3000;
 
-  // SAMPLE TRAIN DATA
-  const allTrains = [
+/*
+RULE:
+- CONFIRM ticket உள்ள trains மட்டும் காட்ட வேண்டும்
+- WL / RAC / NA எதுவும் காட்டக்கூடாது
+*/
+
+app.post("/search", (req, res) => {
+  const { date, from, to } = req.body;
+
+  const trains = [
     {
       trainName: "PANDIAN EXPRESS",
       quota: "TATKAL",
       class: "3A",
-      availability: "CONFIRM",
+      status: "CONFIRM",
       availableSeats: 8
     },
     {
       trainName: "VAIGAI EXPRESS",
-      quota: "TATKAL",
-      class: "3A",
-      availability: "RAC",
-      availableSeats: 2
-    },
-    {
-      trainName: "VANDE BHARAT",
       quota: "GENERAL",
-      class: "CC",
-      availability: "WL",
+      class: "3A",
+      status: "WL",
       availableSeats: 0
     }
   ];
 
-  // 🔥 ONLY CONFIRM FILTER
-  const confirmTrains = allTrains.filter(
-    t => t.availability === "CONFIRM"
-  );
+  // ONLY CONFIRM
+  const result = trains.filter(t => t.status === "CONFIRM");
 
   res.json({
     date,
     from,
     to,
-    quota,
-    classType,
-    result: confirmTrains
+    result
   });
 });
 
 // ROOT CHECK
 app.get("/", (req, res) => {
-  res.json({
-    status: "OK",
-    message: "Confirm Ticket API Working"
-  });
+  res.json({ status: "API RUNNING" });
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
