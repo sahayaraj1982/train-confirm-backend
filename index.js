@@ -8,64 +8,56 @@ app.get("/", (req, res) => {
 });
 
 app.get("/search", (req, res) => {
-  // Demo IRCTC-like data
-  const trains = [
-    {
-      trainName: "PANDIAN EXPRESS",
-      trainNo: "12638",
-      quota: "GENERAL",
-      class: "3A",
-      status: "CONFIRM",
-      currentAvailability: "AVAILABLE",
-      seatsAvailable: 6
-    },
-    {
-      trainName: "PANDIAN EXPRESS",
-      trainNo: "12638",
-      quota: "TATKAL",
-      class: "3A",
-      status: "CONFIRM",
-      currentAvailability: "AVAILABLE",
-      seatsAvailable: 8
-    },
-    {
-      trainName: "PANDIAN EXPRESS",
-      trainNo: "12638",
-      quota: "PREMIUM TATKAL",
-      class: "3A",
-      status: "WL",
-      currentAvailability: "WL 5",
-      seatsAvailable: 0
-    },
-    {
-      trainName: "PANDIAN EXPRESS",
-      trainNo: "12638",
-      quota: "LADIES",
-      class: "SL",
-      status: "CONFIRM",
-      currentAvailability: "AVAILABLE",
-      seatsAvailable: 2
-    },
-    {
-      trainName: "PANDIAN EXPRESS",
-      trainNo: "12638",
-      quota: "SENIOR CITIZEN",
-      class: "2A",
-      status: "CONFIRM",
-      currentAvailability: "AVAILABLE",
-      seatsAvailable: 1
-    }
-  ];
-
-  // CONFIRM ONLY filter
-  const result = trains.filter(t => t.status === "CONFIRM");
-
-  res.json({
+  // Demo data (IRCTC-like)
+  const data = {
     date: req.query.date || "",
     from: req.query.from || "",
     to: req.query.to || "",
-    result
-  });
+    train: {
+      name: "PANDIAN EXPRESS",
+      number: "12638",
+      class: "3A",
+      quotas: [
+        {
+          quota: "GENERAL",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 6,
+          status: "CONFIRM"
+        },
+        {
+          quota: "TATKAL",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 8,
+          status: "CONFIRM"
+        },
+        {
+          quota: "PREMIUM TATKAL",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 2,
+          status: "CONFIRM"
+        },
+        {
+          quota: "LADIES",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 2,
+          status: "CONFIRM"
+        },
+        {
+          quota: "SENIOR CITIZEN",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 1,
+          status: "CONFIRM"
+        }
+      ]
+    }
+  };
+
+  // CONFIRM ONLY (safety filter)
+  data.train.quotas = data.train.quotas.filter(
+    q => q.status === "CONFIRM"
+  );
+
+  res.json(data);
 });
 
 app.listen(PORT);
