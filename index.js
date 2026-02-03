@@ -10,9 +10,11 @@ app.get("/", (req, res) => {
 app.get("/check", (req, res) => {
   res.json({
     train: "PANDIAN",
+    quota: "TATKAL",
+    class: "3A",
     status: "CONFIRM",
     seats: 8
   });
 });
 
-app.listen(PORT)
+app.listen(PORT);
