@@ -1,68 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Confirm Ticket Search</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    input, select, button { margin: 5px; padding: 6px; }
-    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
-    th, td { border: 1px solid #333; padding: 8px; text-align: center; }
-    th { background: #eee; }
-    .confirm { color: green; font-weight: bold; }
-  </style>
+<meta charset="UTF-8">
+<title>Confirm Ticket Search</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+h2{margin-bottom:15px;}
+
+input, select, button{
+  padding:10px;
+  margin:6px 0;
+  width:100%;
+  max-width:400px;
+  display:block;
+}
+
+button{
+  background:#007bff;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button:hover{background:#0056b3;}
+
+table{
+  border-collapse:collapse;
+  margin-top:20px;
+  width:100%;
+}
+th,td{
+  border:1px solid #333;
+  padding:8px;
+  text-align:center;
+}
+th{background:#eaeaea;}
+</style>
 </head>
+
 <body>
 
 <h2>Confirm Ticket Search</h2>
 
-<label>Date:</label>
+<label>Date</label>
 <input type="date" id="date">
 
-<label>From:</label>
-<input type="text" id="from" value="MADURAI">
+<label>From</label>
+<input type="text" id="from" placeholder="MADURAI">
 
-<label>To:</label>
-<input type="text" id="to" value="CHENNAI">
+<label>To</label>
+<input type="text" id="to" placeholder="CHENNAI">
 
-<br><br>
-
-<label>Quota:</label>
+<label>Quota (Current Availability)</label>
 <select id="quota">
-  <option>General</option>
-  <option>Tatkal</option>
-  <option>Premium Tatkal</option>
-  <option>Ladies</option>
-  <option>Senior Citizen</option>
+  <option value="GENERAL">General</option>
+  <option value="TATKAL">Tatkal</option>
+  <option value="PT">Premium Tatkal</option>
+  <option value="LADIES">Ladies</option>
+  <option value="SENIOR">Senior Citizen</option>
 </select>
 
-<button onclick="searchTicket()">Search</button>
+<button onclick="search()">Search (Confirm Only)</button>
 
 <div id="result"></div>
 
 <script>
-function searchTicket() {
-  document.getElementById("result").innerHTML = `
-    <h3>Result (Confirm Ticket Only)</h3>
-    <table>
+function search(){
+
+  // Dummy live-style data (CONFIRM ONLY)
+  const data = [
+    {
+      train:"Pandian Express",
+      number:"12637",
+      quota:"GENERAL",
+      class:"3A",
+      seats:8,
+      status:"CONFIRM"
+    },
+    {
+      train:"Vaigai Express",
+      number:"12635",
+      quota:"TATKAL",
+      class:"SL",
+      seats:5,
+      status:"CONFIRM"
+    }
+  ];
+
+  let html = `
+  <table>
+    <tr>
+      <th>Train Name</th>
+      <th>Train No</th>
+      <th>Quota</th>
+      <th>Class</th>
+      <th>Available Seats</th>
+      <th>Status</th>
+    </tr>`;
+
+  data.forEach(t=>{
+    if(t.status==="CONFIRM"){
+      html += `
       <tr>
-        <th>Train Name / Number</th>
-        <th>Quota</th>
-        <th>Class</th>
-        <th>Status</th>
-        <th>Seats Available</th>
-        <th>Current Availability</th>
-      </tr>
-      <tr>
-        <td>PANDIAN EXPRESS (12637)</td>
-        <td>${document.getElementById("quota").value}</td>
-        <td>3A / Sleeper</td>
-        <td class="confirm">CONFIRM</td>
-        <td>08</td>
-        <td>AVAILABLE</td>
-      </tr>
-    </table>
-  `;
+        <td>${t.train}</td>
+        <td>${t.number}</td>
+        <td>${t.quota}</td>
+        <td>${t.class}</td>
+        <td>${t.seats}</td>
+        <td style="color:green;font-weight:bold;">CONFIRM</td>
+      </tr>`;
+    }
+  });
+
+  html += `</table>`;
+  document.getElementById("result").innerHTML = html;
 }
 </script>
 
