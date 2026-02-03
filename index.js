@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
-
+app.get("/", (req, res) => {
+  res.send("Train Confirm Backend API is running");
+});
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
