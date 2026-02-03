@@ -15,5 +15,4 @@ app.get("/check", (req, res) => {
   });
 });
 
-app.listen(PORT);
-3000
+app.listen(PORT)
