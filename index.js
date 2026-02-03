@@ -1,70 +1,41 @@
 const express = require("express");
 const app = express();
-app.get("/", (req, res) => {
-  res.send("Train Confirm Backend API is running");
-});
-app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
 
 /*
-RULE:
-- CONFIRM ticket உள்ள trains மட்டும் காட்ட வேண்டும்
-- WL / RAC / NA எதுவும் காட்டக்கூடாது
+  API PURPOSE:
+  - Date
+  - From
+  - To
+  - Show ONLY trains with CONFIRM availability
+  - Include General / Tatkal / Premium Tatkal
 */
 
-app.post("/search", (req, res) => {
-  const { date, from, to } = req.body;
-
-  const trains = [
-    {
-      trainName: "PANDIAN EXPRESS",
-      quota: "TATKAL",
-      class: "3A",
-      status: "CONFIRM",
-      availableSeats: 8
-    },
-    {
-      trainName: "VAIGAI EXPRESS",
-      quota: "GENERAL",
-      class: "3A",
-      status: "WL",
-      availableSeats: 0
-    }
-  ];
-
-  // ONLY CONFIRM
-  const result = trains.filter(t => t.status === "CONFIRM");
-
+app.get("/", (req, res) => {
   res.json({
-    date,
-    from,
-    to,
-    result
+    status: "API is running",
+    use: "/api/confirm"
   });
 });
 
-// ROOT CHECK
-app.get("/", (req, res) => {
-  res.json({ status: "API RUNNING" });
-});
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
 app.get("/api/confirm", (req, res) => {
   res.json({
-    date: req.query.date || "N/A",
-    from: req.query.from || "N/A",
-    to: req.query.to || "N/A",
+    date: "03-02-2026",
+    from: "MADURAI",
+    to: "CHENNAI",
     result: [
       {
-        train: "PANDIAN",
+        trainNo: "12638",
+        trainName: "PANDIAN EXPRESS",
         quota: "TATKAL",
         class: "3A",
         availability: "CONFIRM",
-        seats: 8
+        seatsAvailable: 8
       }
     ]
   });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
