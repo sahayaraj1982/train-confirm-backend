@@ -1,33 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirm Ticket Search</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, select, button { padding: 8px; margin: 5px; width: 100%; }
+    button { background: #1976d2; color: #fff; border: none; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+
+<h2>Confirm Ticket Search</h2>
+
+<input type="date" id="date">
+<input type="text" id="from" placeholder="From (MDU)">
+<input type="text" id="to" placeholder="To (MAS)">
+
+<button onclick="search()">Search (Confirm Only)</button>
+
+<table id="result" style="display:none;">
+  <thead>
+    <tr>
+      <th>Train</th>
+      <th>No</th>
+      <th>Class</th>
+      <th>Quota</th>
+      <th>Seats</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
 <script>
-async function searchTickets() {
-  const date = document.getElementById("date").value;
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
-  const quota = document.getElementById("quota").value;
+async function search() {
+  const date = document.getElementById('date').value;
+  const from = document.getElementById('from').value;
+  const to = document.getElementById('to').value;
 
   const url = `https://train-confirm-backend-2.onrender.com/search?date=${date}&from=${from}&to=${to}`;
   const res = await fetch(url);
   const data = await res.json();
 
-  let rows = "";
+  const tbody = document.querySelector("#result tbody");
+  tbody.innerHTML = "";
+
   data.train.quotas.forEach(q => {
-    if (q.status === "CONFIRM" && (quota === "ALL" || q.quota === quota)) {
-      rows += `
+    if (q.status === "CONFIRM") {
+      const row = `
         <tr>
           <td>${data.train.name}</td>
           <td>${data.train.number}</td>
-          <td>${q.quota}</td>
           <td>${data.train.class}</td>
+          <td>${q.quota}</td>
           <td>${q.seatsAvailable}</td>
+          <td>${q.status}</td>
         </tr>`;
+      tbody.innerHTML += row;
     }
   });
 
-  document.getElementById("result").innerHTML = rows
-    ? `<table>
-         <tr><th>Train</th><th>No</th><th>Quota</th><th>Class</th><th>Seats</th></tr>
-         ${rows}
-       </table>`
-    : `<div class="no-result">No Confirm Tickets Available</div>`;
-}
-</script>
+  document.getElement
