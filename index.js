@@ -40,3 +40,24 @@ app.get("/search", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+// HEALTH CHECK (IMPORTANT)
+app.get("/health", (req, res) => {
+  res.json({ status: "OK" });
+});
+
+// EXISTING SEARCH API (example)
+app.get("/search", (req, res) => {
+  res.json({
+    message: "Search API working",
+  });
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
+});
