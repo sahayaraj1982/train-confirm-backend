@@ -3,77 +3,159 @@
 <head>
   <meta charset="UTF-8" />
   <title>Confirm Ticket Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input, select, button { margin: 6px; padding: 6px; }
-    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
-    th, td { border: 1px solid #333; padding: 8px; text-align: center; }
-    th { background: #eee; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 15px;
+    }
+    button {
+      margin-top: 16px;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0b5ed7;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #eee;
+    }
+    .status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-<h2>Confirm Ticket Search</h2>
+<div class="card">
+  <h2>Confirm Ticket Search</h2>
 
-Date:
-<input type="date" id="date"><br>
+  <label>Date</label>
+  <input type="date" id="date" />
 
-From:
-<input type="text" id="from" value="MDU"><br>
+  <label>From (Station Code)</label>
+  <input type="text" id="from" placeholder="MDU" />
 
-To:
-<input type="text" id="to" value="MAS"><br>
+  <label>To (Station Code)</label>
+  <input type="text" id="to" placeholder="MAS" />
 
-<button onclick="search()">Search (Confirm Only)</button>
+  <button onclick="searchTickets()">Search (Confirm Only)</button>
 
-<div id="result"></div>
+  <div class="status" id="status"></div>
+
+  <table id="resultTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Train</th>
+        <th>No</th>
+        <th>Class</th>
+        <th>Quota</th>
+        <th>Seats</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
 
 <script>
-async function search() {
+async function searchTickets() {
   const date = document.getElementById("date").value;
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
+  const from = document.getElementById("from").value.trim().toUpperCase();
+  const to = document.getElementById("to").value.trim().toUpperCase();
+
+  const statusEl = document.getElementById("status");
+  const table = document.getElementById("resultTable");
+  const tbody = document.getElementById("resultBody");
+
+  table.style.display = "none";
+  tbody.innerHTML = "";
 
   if (!date || !from || !to) {
-    alert("Fill all fields");
+    statusEl.textContent = "❌ Please fill all fields";
     return;
   }
 
-  const url = `https://train-confirm-backend-2.onrender.com/check?date=${date}&from=${from}&to=${to}`;
+  statusEl.textContent = "⏳ Checking availability...";
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(
+      `https://train-confirm-backend-2.onrender.com/check?date=${date}&from=${from}&to=${to}`
+    );
+
     const data = await res.json();
 
-    let html = `
-      <h3>${data.train.name} (${data.train.number})</h3>
-      <table>
-        <tr>
-          <th>Quota</th>
-          <th>Status</th>
-          <th>Seats</th>
-        </tr>
-    `;
+    if (!data.train || !data.train.quotas) {
+      statusEl.textContent = "❌ No data received";
+      return;
+    }
+
+    let found = false;
 
     data.train.quotas.forEach(q => {
-      if (q.status === "CONFIRM") {
-        html += `
-          <tr>
-            <td>${q.quota}</td>
-            <td>${q.status}</td>
-            <td>${q.seatsAvailable}</td>
-          </tr>
+      if (q.status === "CONFIRM" && q.seatsAvailable > 0) {
+        found = true;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.train.name}</td>
+          <td>${data.train.number}</td>
+          <td>${data.train.class}</td>
+          <td>${q.quota}</td>
+          <td>${q.seatsAvailable}</td>
+          <td>${q.status}</td>
         `;
+        tbody.appendChild(row);
       }
     });
 
-    html += "</table>";
-    document.getElementById("result").innerHTML = html;
+    if (found) {
+      statusEl.textContent = "✅ Confirm tickets available";
+      table.style.display = "table";
+    } else {
+      statusEl.textContent = "❌ No confirm tickets available";
+    }
 
-  } catch (e) {
-    document.getElementById("result").innerHTML =
-      "<b>Error connecting to server</b>";
-    console.error(e);
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "❌ Server error";
   }
 }
 </script>
