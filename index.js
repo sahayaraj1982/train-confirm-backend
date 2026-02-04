@@ -1,60 +1,56 @@
 const express = require("express");
-const app = express();
-const PORT = process.env.PORT || 3000;
+const axios = require("axios");
 
+const app = express();
 app.use(express.json());
 
-// ✅ Health check
+// HEALTH CHECK
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-// ✅ Search API (IRCTC API key ready structure)
+// SEARCH – CONFIRM TICKET ONLY
 app.get("/search", async (req, res) => {
-  const { date, from, to } = req.query;
+  try {
+    const { date, from, to } = req.query;
 
-  if (!date || !from || !to) {
-    return res.status(400).json({ error: "Missing parameters" });
-  }
-
-  // 🔹 TEMP SAMPLE RESPONSE (IRCTC API replace here)
-  res.json({
-    date,
-    from,
-    to,
-    train: {
-      name: "PANDIAN EXPRESS",
-      number: "12638",
-      class: "3A",
-      quotas: [
-        { quota: "GENERAL", currentAvailability: "AVAILABLE", seatsAvailable: 6, status: "CONFIRM" },
-        { quota: "TATKAL", currentAvailability: "AVAILABLE", seatsAvailable: 8, status: "CONFIRM" },
-        { quota: "PREMIUM TATKAL", currentAvailability: "AVAILABLE", seatsAvailable: 2, status: "CONFIRM" },
-        { quota: "LADIES", currentAvailability: "AVAILABLE", seatsAvailable: 2, status: "CONFIRM" },
-        { quota: "SENIOR CITIZEN", currentAvailability: "AVAILABLE", seatsAvailable: 1, status: "CONFIRM" }
-      ]
+    if (!date || !from || !to) {
+      return res.status(400).json({ error: "Missing parameters" });
     }
-  });
-});
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-const express = require("express");
-const app = express();
+    const response = await axios.get(
+      process.env.IRCTC_API_URL,
+      {
+        headers: {
+          "Authorization": `Bearer ${process.env.IRCTC_API_KEY}`,
+          "Accept": "application/json"
+        },
+        params: {
+          date,
+          from,
+          to
+        }
+      }
+    );
 
-app.use(express.json());
+    // FILTER – CONFIRM ONLY
+    const confirmTrains = response.data.trains.filter(
+      t => t.status === "CONFIRM"
+    );
 
-// HEALTH CHECK (IMPORTANT)
-app.get("/health", (req, res) => {
-  res.json({ status: "OK" });
-});
+    res.json({
+      date,
+      from,
+      to,
+      results: confirmTrains
+    });
 
-// EXISTING SEARCH API (example)
-app.get("/search", (req, res) => {
-  res.json({
-    message: "Search API working",
-  });
+  } catch (err) {
+    res.status(500).json({
+      error: "IRCTC API error",
+      details: err.message
+    });
+  }
 });
 
 const PORT = process.env.PORT || 10000;
