@@ -12,15 +12,16 @@
       padding: 20px;
     }
     .card {
-      max-width: 600px;
+      max-width: 480px;
       margin: auto;
       background: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     h2 {
       margin-top: 0;
+      text-align: center;
     }
     label {
       display: block;
@@ -31,14 +32,14 @@
       width: 100%;
       padding: 10px;
       margin-top: 6px;
-      font-size: 15px;
+      font-size: 16px;
     }
     button {
-      margin-top: 16px;
       background: #0d6efd;
-      color: white;
+      color: #fff;
       border: none;
       border-radius: 4px;
+      margin-top: 20px;
       cursor: pointer;
     }
     button:hover {
@@ -53,11 +54,13 @@
       border: 1px solid #ccc;
       padding: 8px;
       text-align: center;
+      font-size: 14px;
     }
     th {
       background: #eee;
     }
-    .status {
+    .loading {
+      text-align: center;
       margin-top: 15px;
       font-weight: bold;
     }
@@ -69,93 +72,78 @@
   <h2>Confirm Ticket Search</h2>
 
   <label>Date</label>
-  <input type="date" id="date" />
+  <input type="date" id="date">
 
   <label>From (Station Code)</label>
-  <input type="text" id="from" placeholder="MDU" />
+  <input type="text" id="from" placeholder="MDU">
 
   <label>To (Station Code)</label>
-  <input type="text" id="to" placeholder="MAS" />
+  <input type="text" id="to" placeholder="MAS">
 
   <button onclick="searchTickets()">Search (Confirm Only)</button>
 
-  <div class="status" id="status"></div>
-
-  <table id="resultTable" style="display:none;">
-    <thead>
-      <tr>
-        <th>Train</th>
-        <th>No</th>
-        <th>Class</th>
-        <th>Quota</th>
-        <th>Seats</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="resultBody"></tbody>
-  </table>
+  <div id="loading" class="loading"></div>
+  <div id="result"></div>
 </div>
 
 <script>
 async function searchTickets() {
   const date = document.getElementById("date").value;
-  const from = document.getElementById("from").value.trim().toUpperCase();
-  const to = document.getElementById("to").value.trim().toUpperCase();
-
-  const statusEl = document.getElementById("status");
-  const table = document.getElementById("resultTable");
-  const tbody = document.getElementById("resultBody");
-
-  table.style.display = "none";
-  tbody.innerHTML = "";
+  const from = document.getElementById("from").value.trim();
+  const to = document.getElementById("to").value.trim();
 
   if (!date || !from || !to) {
-    statusEl.textContent = "❌ Please fill all fields";
+    alert("Please fill all fields");
     return;
   }
 
-  statusEl.textContent = "⏳ Checking availability...";
+  document.getElementById("loading").innerText = "Searching...";
+  document.getElementById("result").innerHTML = "";
 
   try {
     const res = await fetch(
-      `https://train-confirm-backend-2.onrender.com/check?date=${date}&from=${from}&to=${to}`
+      `https://train-confirm-backend-2.onrender.com/search?date=${date}&from=${from}&to=${to}`
     );
-
     const data = await res.json();
 
-    if (!data.train || !data.train.quotas) {
-      statusEl.textContent = "❌ No data received";
+    document.getElementById("loading").innerText = "";
+
+    if (!data.train) {
+      document.getElementById("result").innerHTML = "<b>No confirm tickets found</b>";
       return;
     }
 
-    let found = false;
+    let html = `
+      <table>
+        <tr>
+          <th>Train</th>
+          <th>Number</th>
+          <th>Class</th>
+          <th>Quota</th>
+          <th>Seats</th>
+        </tr>
+    `;
 
     data.train.quotas.forEach(q => {
-      if (q.status === "CONFIRM" && q.seatsAvailable > 0) {
-        found = true;
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.train.name}</td>
-          <td>${data.train.number}</td>
-          <td>${data.train.class}</td>
-          <td>${q.quota}</td>
-          <td>${q.seatsAvailable}</td>
-          <td>${q.status}</td>
+      if (q.status === "CONFIRM") {
+        html += `
+          <tr>
+            <td>${data.train.name}</td>
+            <td>${data.train.number}</td>
+            <td>${data.train.class}</td>
+            <td>${q.quota}</td>
+            <td>${q.seatsAvailable}</td>
+          </tr>
         `;
-        tbody.appendChild(row);
       }
     });
 
-    if (found) {
-      statusEl.textContent = "✅ Confirm tickets available";
-      table.style.display = "table";
-    } else {
-      statusEl.textContent = "❌ No confirm tickets available";
-    }
+    html += "</table>";
+    document.getElementById("result").innerHTML = html;
 
   } catch (err) {
-    console.error(err);
-    statusEl.textContent = "❌ Server error";
+    document.getElementById("loading").innerText = "";
+    document.getElementById("result").innerHTML = "Error connecting to server";
   }
 }
 </script>
