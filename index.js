@@ -1,59 +1,42 @@
 const express = require("express");
-const axios = require("axios");
+const cors = require("cors");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-// HEALTH CHECK
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-// SEARCH – CONFIRM TICKET ONLY
-app.get("/search", async (req, res) => {
-  try {
-    const { date, from, to } = req.query;
+app.post("/search", (req, res) => {
+  const { date, from, to } = req.body;
 
-    if (!date || !from || !to) {
-      return res.status(400).json({ error: "Missing parameters" });
-    }
-
-    const response = await axios.get(
-      process.env.IRCTC_API_URL,
-      {
-        headers: {
-          "Authorization": `Bearer ${process.env.IRCTC_API_KEY}`,
-          "Accept": "application/json"
-        },
-        params: {
-          date,
-          from,
-          to
-        }
-      }
-    );
-
-    // FILTER – CONFIRM ONLY
-    const confirmTrains = response.data.trains.filter(
-      t => t.status === "CONFIRM"
-    );
-
-    res.json({
-      date,
-      from,
-      to,
-      results: confirmTrains
-    });
-
-  } catch (err) {
-    res.status(500).json({
-      error: "IRCTC API error",
-      details: err.message
-    });
+  if (!date || !from || !to) {
+    return res.status(400).json({ error: "Missing fields" });
   }
+
+  res.json({
+    date,
+    from,
+    to,
+    train: {
+      name: "PANDIAN EXPRESS",
+      number: "12638",
+      class: "3A",
+      quotas: [
+        {
+          quota: "GENERAL",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 6,
+          status: "CONFIRM"
+        }
+      ]
+    }
+  });
 });
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("Server running on port " + PORT);
 });
