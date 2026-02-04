@@ -1,77 +1,42 @@
 const express = require("express");
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
-/*
-MOCK REAL-LIKE ENGINE
-RULES:
-- Date / From / To based
-- Quota-wise current availability
-- CONFIRM tickets ONLY
-*/
+app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("OK");
+// ✅ Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "OK" });
 });
 
-app.get("/search", (req, res) => {
+// ✅ Search API (IRCTC API key ready structure)
+app.get("/search", async (req, res) => {
   const { date, from, to } = req.query;
 
-  // Base mock availability logic (simple + stable)
-  const baseSeats = (date && date.endsWith("5")) ? 4 : 8;
+  if (!date || !from || !to) {
+    return res.status(400).json({ error: "Missing parameters" });
+  }
 
-  const response = {
-    date: date || "",
-    from: from || "",
-    to: to || "",
+  // 🔹 TEMP SAMPLE RESPONSE (IRCTC API replace here)
+  res.json({
+    date,
+    from,
+    to,
     train: {
       name: "PANDIAN EXPRESS",
       number: "12638",
       class: "3A",
       quotas: [
-        {
-          quota: "GENERAL",
-          status: "CONFIRM",
-          currentAvailability: "AVAILABLE",
-          seatsAvailable: baseSeats
-        },
-        {
-          quota: "TATKAL",
-          status: "CONFIRM",
-          currentAvailability: "AVAILABLE",
-          seatsAvailable: baseSeats - 2
-        },
-        {
-          quota: "PREMIUM TATKAL",
-          status: "CONFIRM",
-          currentAvailability: "AVAILABLE",
-          seatsAvailable: baseSeats - 3
-        },
-        {
-          quota: "LADIES",
-          status: "CONFIRM",
-          currentAvailability: "AVAILABLE",
-          seatsAvailable: 2
-        },
-        {
-          quota: "SENIOR CITIZEN",
-          status: "CONFIRM",
-          currentAvailability: "AVAILABLE",
-          seatsAvailable: 1
-        }
+        { quota: "GENERAL", currentAvailability: "AVAILABLE", seatsAvailable: 6, status: "CONFIRM" },
+        { quota: "TATKAL", currentAvailability: "AVAILABLE", seatsAvailable: 8, status: "CONFIRM" },
+        { quota: "PREMIUM TATKAL", currentAvailability: "AVAILABLE", seatsAvailable: 2, status: "CONFIRM" },
+        { quota: "LADIES", currentAvailability: "AVAILABLE", seatsAvailable: 2, status: "CONFIRM" },
+        { quota: "SENIOR CITIZEN", currentAvailability: "AVAILABLE", seatsAvailable: 1, status: "CONFIRM" }
       ]
     }
-  };
-
-  // Safety filter: CONFIRM only
-  response.train.quotas = response.train.quotas.filter(
-    q => q.status === "CONFIRM" && q.seatsAvailable > 0
-  );
-
-  res.json(response);
+  });
 });
 
 app.listen(PORT, () => {
-  console.log("Mock engine running on port " + PORT);
+  console.log(`Server running on port ${PORT}`);
 });
