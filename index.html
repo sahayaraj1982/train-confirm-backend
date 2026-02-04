@@ -1,58 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Confirm Ticket Search</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial; background:#f4f6f8; margin:0; padding:10px; }
-    .card { background:#fff; padding:15px; border-radius:8px; margin-bottom:10px; }
-    input, button { width:100%; padding:10px; margin:5px 0; }
-    button { background:#007bff; color:#fff; border:none; border-radius:5px; }
-    .quota { border-top:1px solid #eee; padding:8px 0; }
-    .ok { color:green; font-weight:bold; }
+    body { font-family: Arial; padding: 20px; }
+    input, select, button { margin: 6px; padding: 6px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+    th { background: #eee; }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h3>Confirm Ticket Search</h3>
-  <input type="date" id="date">
-  <input type="text" id="from" placeholder="From (e.g. MDU)">
-  <input type="text" id="to" placeholder="To (e.g. MAS)">
-  <button onclick="search()">Search</button>
-</div>
+<h2>Confirm Ticket Search</h2>
+
+Date:
+<input type="date" id="date"><br>
+
+From:
+<input type="text" id="from" value="MDU"><br>
+
+To:
+<input type="text" id="to" value="MAS"><br>
+
+<button onclick="search()">Search (Confirm Only)</button>
 
 <div id="result"></div>
 
 <script>
-function search() {
+async function search() {
   const date = document.getElementById("date").value;
   const from = document.getElementById("from").value;
   const to = document.getElementById("to").value;
 
-  fetch(`https://train-confirm-backend-2.onrender.com/search?date=${date}&from=${from}&to=${to}`)
-    .then(r => r.json())
-    .then(data => {
-      let html = `
-        <div class="card">
-          <h4>${data.train.name} (${data.train.number})</h4>
-          <p>Class: ${data.train.class}</p>
-      `;
+  if (!date || !from || !to) {
+    alert("Fill all fields");
+    return;
+  }
 
-      data.train.quotas.forEach(q => {
+  const url = `https://train-confirm-backend-2.onrender.com/check?date=${date}&from=${from}&to=${to}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    let html = `
+      <h3>${data.train.name} (${data.train.number})</h3>
+      <table>
+        <tr>
+          <th>Quota</th>
+          <th>Status</th>
+          <th>Seats</th>
+        </tr>
+    `;
+
+    data.train.quotas.forEach(q => {
+      if (q.status === "CONFIRM") {
         html += `
-          <div class="quota">
-            <div>${q.quota}</div>
-            <div class="ok">${q.currentAvailability}</div>
-            <div>${q.seatsAvailable} seats available</div>
-          </div>
+          <tr>
+            <td>${q.quota}</td>
+            <td>${q.status}</td>
+            <td>${q.seatsAvailable}</td>
+          </tr>
         `;
-      });
-
-      html += `</div>`;
-      document.getElementById("result").innerHTML = html;
+      }
     });
+
+    html += "</table>";
+    document.getElementById("result").innerHTML = html;
+
+  } catch (e) {
+    document.getElementById("result").innerHTML =
+      "<b>Error connecting to server</b>";
+    console.error(e);
+  }
 }
 </script>
 
