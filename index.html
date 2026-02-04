@@ -1,120 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Confirm Ticket Search</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 20px;
-    }
-    .box {
-      max-width: 500px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-    }
-    button {
-      margin-top: 15px;
-      background: #0d6efd;
-      color: #fff;
-      border: none;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background: #eee;
-    }
-  </style>
-</head>
-<body>
-
-<div class="box">
-  <h3>Confirm Ticket Search</h3>
-
-  <label>Date</label>
-  <input type="date" id="date">
-
-  <label>From</label>
-  <input type="text" id="from" placeholder="MDU">
-
-  <label>To</label>
-  <input type="text" id="to" placeholder="MAS">
-
-  <button onclick="search()">Search</button>
-
-  <div id="msg"></div>
-  <div id="result"></div>
-</div>
-
 <script>
-async function search() {
+function searchTicket() {
   const date = document.getElementById("date").value;
   const from = document.getElementById("from").value;
   const to = document.getElementById("to").value;
 
-  if (!date || !from || !to) {
-    alert("All fields required");
-    return;
-  }
-
-  document.getElementById("msg").innerText = "Searching...";
-  document.getElementById("result").innerHTML = "";
-
-  try {
-    const res = await fetch(
-      `https://train-confirm-backend-2.onrender.com/check?date=${date}&from=${from}&to=${to}`
-    );
-    const data = await res.json();
-
-    document.getElementById("msg").innerText = "";
-
-    if (!data.train) {
-      document.getElementById("msg").innerText = "No data";
-      return;
-    }
-
-    let html = "<table><tr><th>Train</th><th>Quota</th><th>Seats</th></tr>";
-
-    data.train.quotas.forEach(q => {
-      if (q.status === "CONFIRM") {
-        html += `<tr>
-          <td>${data.train.name}</td>
-          <td>${q.quota}</td>
-          <td>${q.seatsAvailable}</td>
-        </tr>`;
-      }
-    });
-
-    html += "</table>";
-    document.getElementById("result").innerHTML = html;
-
-  } catch (e) {
-    document.getElementById("msg").innerText = "Server error";
-  }
+  fetch("https://train-confirm-backend-2.onrender.com/search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      date: date,
+      from: from,
+      to: to
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("result").innerText =
+      "Train: " + data.train.name +
+      " | Seats: " + data.train.quotas[0].seatsAvailable;
+  })
+  .catch(() => {
+    document.getElementById("result").innerText = "Server error";
+  });
 }
 </script>
-
-</body>
-</html>
