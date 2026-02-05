@@ -84,7 +84,7 @@ async function search() {
     return;
   }
 
-  const url = `https://train-confirm-backend-2.onrender.com/search?date=${date}&from=${from}&to=${to}`;
+  fetch("https://train-confirm-backend-2.onrender.com/search?date=" + date + "&from=" + from + "&to=" + to)
 
   try {
     const res = await fetch(url);
