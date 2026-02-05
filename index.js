@@ -2,18 +2,23 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"]
+}));
+
 app.use(express.json());
 
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-app.post("/search", (req, res) => {
-  const { date, from, to } = req.body;
+app.get("/search", (req, res) => {
+  const { date, from, to } = req.query;
 
   if (!date || !from || !to) {
-    return res.status(400).json({ error: "Missing fields" });
+    return res.status(400).json({ error: "Missing parameters" });
   }
 
   res.json({
@@ -29,6 +34,12 @@ app.post("/search", (req, res) => {
           quota: "GENERAL",
           currentAvailability: "AVAILABLE",
           seatsAvailable: 6,
+          status: "CONFIRM"
+        },
+        {
+          quota: "TATKAL",
+          currentAvailability: "AVAILABLE",
+          seatsAvailable: 8,
           status: "CONFIRM"
         }
       ]
