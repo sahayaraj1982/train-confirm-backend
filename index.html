@@ -4,118 +4,152 @@
   <meta charset="UTF-8" />
   <title>Confirm Ticket Search</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
+      margin: 0;
+      padding: 0;
     }
-    .card {
+    .container {
       max-width: 420px;
       margin: 40px auto;
       background: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
       margin-bottom: 20px;
     }
     label {
-      font-weight: bold;
       display: block;
-      margin-top: 12px;
+      margin-top: 10px;
+      font-weight: bold;
     }
-    input, button {
+    input {
       width: 100%;
       padding: 10px;
-      margin-top: 6px;
-      font-size: 16px;
+      margin-top: 5px;
+      box-sizing: border-box;
     }
     button {
+      width: 100%;
       margin-top: 20px;
+      padding: 12px;
       background: #0d6efd;
-      color: white;
+      color: #fff;
       border: none;
+      font-size: 16px;
       border-radius: 4px;
       cursor: pointer;
     }
     button:hover {
-      background: #084298;
-    }
-    pre {
-      background: #111;
-      color: #0f0;
-      padding: 10px;
-      overflow-x: auto;
-      margin-top: 15px;
-      font-size: 13px;
+      background: #0b5ed7;
     }
     .error {
       color: red;
-      margin-top: 10px;
+      margin-top: 15px;
       text-align: center;
+    }
+    .result {
+      margin-top: 20px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .ok {
+      color: green;
+      font-weight: bold;
     }
   </style>
 </head>
-
 <body>
-  <div class="card">
-    <h2>Confirm Ticket Search</h2>
 
-    <label>Date</label>
-    <input type="date" id="date" />
+<div class="container">
+  <h2>Confirm Ticket Search</h2>
 
-    <label>From (Station Code)</label>
-    <input type="text" id="from" placeholder="MDU" />
+  <label>Date</label>
+  <input type="date" id="date" />
 
-    <label>To (Station Code)</label>
-    <input type="text" id="to" placeholder="MAS" />
+  <label>From (Station Code)</label>
+  <input type="text" id="from" placeholder="MDU" />
 
-    <button onclick="searchTickets()">Search (Confirm Only)</button>
+  <label>To (Station Code)</label>
+  <input type="text" id="to" placeholder="MAS" />
 
-    <div id="error" class="error"></div>
-    <div id="result"></div>
-  </div>
+  <button onclick="searchTicket()">Search (Confirm Only)</button>
 
-  <script>
-    async function searchTickets() {
-      document.getElementById("error").innerText = "";
-      document.getElementById("result").innerHTML = "";
+  <div id="error" class="error"></div>
+  <div id="result" class="result"></div>
+</div>
 
-      const date = document.getElementById("date").value;
-      const from = document.getElementById("from").value.toUpperCase();
-      const to = document.getElementById("to").value.toUpperCase();
+<script>
+async function searchTicket() {
+  document.getElementById("error").innerText = "";
+  document.getElementById("result").innerHTML = "";
 
-      if (!date || !from || !to) {
-        document.getElementById("error").innerText =
-          "Date, From, To required";
-        return;
+  const date = document.getElementById("date").value;
+  const from = document.getElementById("from").value.toUpperCase();
+  const to = document.getElementById("to").value.toUpperCase();
+
+  if (!date || !from || !to) {
+    document.getElementById("error").innerText = "Please fill all fields";
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://train-confirm-backend-2.onrender.com/check/",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, from, to })
       }
+    );
 
-      try {
-        const res = await fetch(
-          "https://train-confirm-backend-2.onrender.com/check",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ date, from, to })
-          }
-        );
-
-        if (!res.ok) throw new Error("Server error");
-
-        const data = await res.json();
-
-        document.getElementById("result").innerHTML =
-          "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
-
-      } catch (err) {
-        document.getElementById("error").innerText =
-          "Error connecting to server";
-      }
+    if (!res.ok) {
+      throw new Error("Server error");
     }
-  </script>
+
+    const data = await res.json();
+
+    if (!data.train || !data.train.quotas) {
+      document.getElementById("error").innerText = "No confirm tickets";
+      return;
+    }
+
+    let html = `
+      <div class="card">
+        <div><b>Train:</b> ${data.train.name} (${data.train.number})</div>
+        <div><b>Class:</b> ${data.train.class}</div>
+      </div>
+    `;
+
+    data.train.quotas.forEach(q => {
+      if (q.status === "CONFIRM") {
+        html += `
+          <div class="card">
+            <div><b>Quota:</b> ${q.quota}</div>
+            <div><b>Availability:</b> ${q.currentAvailability}</div>
+            <div class="ok">Seats: ${q.seatsAvailable}</div>
+          </div>
+        `;
+      }
+    });
+
+    document.getElementById("result").innerHTML = html;
+
+  } catch (e) {
+    document.getElementById("error").innerText =
+      "Error connecting to server. Wait 30 seconds and try again.";
+  }
+}
+</script>
+
 </body>
 </html>
