@@ -1,28 +1,101 @@
-<script>
-function searchTicket() {
-  const date = document.getElementById("date").value;
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Confirm Ticket Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+    }
+    .box {
+      max-width: 420px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
 
-  fetch("https://train-confirm-backend-2.onrender.com/search", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      date: date,
-      from: from,
-      to: to
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById("result").innerText =
-      "Train: " + data.train.name +
-      " | Seats: " + data.train.quotas[0].seatsAvailable;
-  })
-  .catch(() => {
-    document.getElementById("result").innerText = "Server error";
-  });
+<div class="box">
+  <h2>Confirm Ticket Search</h2>
+
+  <label>Date</label>
+  <input type="date" id="date">
+
+  <label>From (Station Code)</label>
+  <input type="text" id="from" placeholder="MDU">
+
+  <label>To (Station Code)</label>
+  <input type="text" id="to" placeholder="MAS">
+
+  <button onclick="search()">Search</button>
+
+  <div id="error" class="error"></div>
+  <pre id="result"></pre>
+</div>
+
+<script>
+async function search() {
+  document.getElementById("error").innerText = "";
+  document.getElementById("result").innerText = "";
+
+  const date = document.getElementById("date").value;
+  const from = document.getElementById("from").value.toUpperCase();
+  const to = document.getElementById("to").value.toUpperCase();
+
+  if (!date || !from || !to) {
+    document.getElementById("error").innerText = "All fields required";
+    return;
+  }
+
+  const url = `https://train-confirm-backend-2.onrender.com/search?date=${date}&from=${from}&to=${to}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Server error");
+    const data = await res.json();
+    document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+  } catch (e) {
+    document.getElementById("error").innerText = "Error connecting to server";
+  }
 }
 </script>
+
+</body>
+</html>
