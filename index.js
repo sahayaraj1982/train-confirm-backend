@@ -2,25 +2,23 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"]
-}));
-
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
+// Health check
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-app.get("/search", (req, res) => {
-  const { date, from, to } = req.query;
+// IMPORTANT: POST /check (this MUST exist)
+app.post("/check", (req, res) => {
+  const { date, from, to } = req.body;
 
   if (!date || !from || !to) {
-    return res.status(400).json({ error: "Missing parameters" });
+    return res.status(400).json({ error: "Missing fields" });
   }
 
+  // Mock response (stable)
   res.json({
     date,
     from,
